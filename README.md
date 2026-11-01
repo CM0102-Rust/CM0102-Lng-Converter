@@ -64,6 +64,10 @@ Build: `pip install pyinstaller`, then `build.bat`. The exe comes out in `dist\`
 
 No game file is in this repository: the tool reads the `.dat` and `.lng` files from your own game folder.
 
+## License
+
+[MIT](LICENSE): free to use, modify and share, including in other projects, as long as the copyright notice is kept (credit to the author). The game itself is not covered: it belongs to its owners.
+
 ## About
 
 Part of the **CM 01/02 in Rust** project, which reverse engineers 3.9.68 and rewrites it routine by routine. The analysis of the game code was done with the help of artificial intelligence. Thanks to the champman0102 community, and to everyone keeping 01/02 alive.

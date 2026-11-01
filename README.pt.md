@@ -63,6 +63,10 @@ Para compilar: `pip install pyinstaller` e depois `build.bat`. O exe sai em `dis
 
 Nenhum arquivo do jogo está neste repositório: a ferramenta lê os `.dat` e os `.lng` da pasta do seu próprio jogo.
 
+## Licença
+
+[MIT](LICENSE): uso, alteração e compartilhamento livres, inclusive em outros projetos, desde que o aviso de direitos autorais seja mantido (o crédito ao autor). O jogo em si não está incluído: pertence aos seus donos.
+
 ## Sobre
 
 Parte do projeto **CM 01/02 em Rust**, que faz a engenharia reversa da 3.9.68 e a reescreve rotina por rotina. A análise do código do jogo foi feita com a ajuda de inteligência artificial. Obrigado à comunidade do champman0102 e a todos que mantêm o 01/02 vivo.

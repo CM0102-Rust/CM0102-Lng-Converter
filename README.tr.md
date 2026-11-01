@@ -64,6 +64,10 @@ Derleme: `pip install pyinstaller`, ardından `build.bat`. Exe `dist\` klasörü
 
 Bu depoda oyuna ait hiçbir dosya yoktur: araç `.dat` ve `.lng` dosyalarını sizin oyun klasörünüzden okur.
 
+## Lisans
+
+[MIT](LICENSE): telif hakkı bildirimi korunduğu sürece (yazara atıf) başka projeler dahil serbestçe kullanılabilir, değiştirilebilir ve paylaşılabilir. Oyunun kendisi buna dahil değildir: sahiplerine aittir.
+
 ## Hakkında
 
 3.9.68'in tersine mühendisliğini yapan ve onu rutin rutin yeniden yazan **CM 01/02 in Rust** projesinin bir parçasıdır. Oyun kodunun analizi yapay zekâ yardımıyla yapıldı. champman0102 topluluğuna ve 01/02'yi yaşatan herkese teşekkürler.
