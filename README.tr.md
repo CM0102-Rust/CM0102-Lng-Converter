@@ -48,7 +48,7 @@ python lng_confere.py <dosya.lng> <Data>
 
 - `--completar` seçeneği `eng.lng` içindir: eşi bulunmayan kayıtlar boş kayıt yerine yeni veritabanının kendi İngilizce metnini alır, çünkü oyun `eng.lng` okurken veritabanındaki isme geri dönmez.
 - `lng_confere.py`, oyunu açmadan, bir `.lng` dosyasının belirli bir veritabanıyla kabul edilip edilmeyeceğini söyler.
-- Komut satırı mesajları, projenin geri kalanı gibi Portekizcedir.
+- Komut satırı raporu, projenin geri kalanı gibi Portekizcedir; hata mesajları İngilizcedir.
 
 ## Dosyalar
 

@@ -48,7 +48,7 @@ python lng_confere.py <file.lng> <Data>
 
 - `--completar` is for `eng.lng`: entries with no match get the new database's own English text instead of an empty record, because the game does not fall back to the database name when reading `eng.lng`.
 - `lng_confere.py` tells, without opening the game, whether it will accept a `.lng` with a given database.
-- The command line messages are in Portuguese, like the rest of the project.
+- The command line report is in Portuguese, like the rest of the project; error messages are in English.
 
 ## Files
 

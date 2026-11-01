@@ -36,6 +36,9 @@ SECOES = [
 ]
 # onde fica o id do "dono" do nome, para separar homônimos: (tabela do dono, deslocamento no registro do banco)
 DONO = {'clubes': ('nações', 0x53), 'cidades': ('nações', 0x1f), 'estádios': ('cidades', 0x38)}
+NOMES_EN = {'clubes': 'clubs', 'continentes': 'continents', 'competições de seleções': 'national team comps',
+            'nações': 'nations', 'estádios': 'stadiums', 'cidades': 'cities',
+            'competições de pessoal': 'awards (staff comps)', 'competições de clubes': 'club comps'}
 
 
 def texto(b):
@@ -61,22 +64,38 @@ def tem_texto(reg, sec):
     return any(b for i, b in enumerate(reg) if i not in sec[6])
 
 
+class Erro(Exception):
+    """Problema previsível nas entradas; a mensagem é em inglês porque a janela (o fórum) a mostra."""
+
+
 def ler_lng(caminho):
+    if not os.path.isfile(caminho):
+        raise Erro('%s: file not found' % caminho)
     d = open(caminho, 'rb').read()
+    if len(d) < 32:
+        raise Erro('%s: too small to be a .lng file (%d bytes)' % (caminho, len(d)))
     cab = struct.unpack('<8I', d[:32])
     if cab[0] == 0xf1fffff1:
-        sys.exit('%s: formato com a marca 0xf1fffff1 (bytes trocados): não suportado' % caminho)
+        raise Erro('%s: byte-swapped .lng (marker 0xf1fffff1): not supported' % caminho)
+    # o tamanho antes de fatiar: um arquivo que não é .lng traz quantidades absurdas no "cabeçalho"
+    esperado = 32 + sum(cab[s[1]] * s[2] for s in SECOES)
+    if esperado != len(d):
+        raise Erro('%s: not a valid .lng file (its header asks for %d bytes, the file has %d)'
+                   % (caminho, esperado, len(d)))
     regs, p = {}, 32
     for sec in SECOES:
         n, t = cab[sec[1]], sec[2]
         regs[sec[0]] = [d[p + i * t:p + (i + 1) * t] for i in range(n)]
         p += n * t
-    if p != len(d):
-        sys.exit('%s: tamanho %d, o cabeçalho pede %d' % (caminho, len(d), p))
     return regs
 
 
 def ler_banco(data):
+    if not os.path.isdir(data):
+        raise Erro('%s: folder not found' % data)
+    faltam = [a for s in SECOES for a in s[3] if not os.path.isfile(os.path.join(data, a))]
+    if faltam:
+        raise Erro('%s is not a game Data folder (missing %s)' % (data, ', '.join(faltam)))
     banco = {}
     for nome, _, _, arqs, reg, _, _ in SECOES:
         d = b''.join(open(os.path.join(data, a), 'rb').read() for a in arqs)
@@ -136,8 +155,9 @@ def converter(lng, data_velho, data_novo, completar=False):
     velho, novo = ler_banco(data_velho), ler_banco(data_novo)
     for s in SECOES:
         if len(regs[s[0]]) != len(velho[s[0]]):
-            sys.exit('%s: %d %s, o banco %s tem %d: o .lng não é deste banco' % (
-                lng, len(regs[s[0]]), s[0], data_velho, len(velho[s[0]])))
+            raise Erro('%s was not made for the database in %s (%d %s in the .lng, %d in the database).\n'
+                       'Pick the Data folder of the database the .lng was made for (not the new one).' % (
+                           lng, data_velho, len(regs[s[0]]), NOMES_EN[s[0]], len(velho[s[0]])))
     kv, kn = chaves(velho), chaves(novo)
     saida, rel = [], {}
     for s in SECOES:
@@ -186,7 +206,10 @@ def main():
     args = [a for a in sys.argv[1:] if a not in ('-v', '--completar')]
     if len(args) != 4:
         sys.exit(__doc__)
-    dados, rel = converter(*args[:3], completar='--completar' in sys.argv)
+    try:
+        dados, rel = converter(*args[:3], completar='--completar' in sys.argv)
+    except Erro as e:
+        sys.exit(str(e))
     open(args[3], 'wb').write(dados)
     print('gravado %s (%d bytes)\n' % (args[3], len(dados)))
     print('%-26s %7s %10s %12s %9s %10s %9s' % ('tabela', 'novo', 'traduzidas', 'casadas s/t', 'sem par',

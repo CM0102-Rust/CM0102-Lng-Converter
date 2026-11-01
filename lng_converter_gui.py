@@ -8,14 +8,11 @@ import os
 import shutil
 import sys
 import tkinter as tk
+import traceback
 from tkinter import filedialog, messagebox, scrolledtext
 
 import lng_confere
 import lng_converter as conv
-
-NOMES_EN = {'clubes': 'clubs', 'continentes': 'continents', 'competições de seleções': 'national team comps',
-            'nações': 'nations', 'estádios': 'stadiums', 'cidades': 'cities',
-            'competições de pessoal': 'awards (staff comps)', 'competições de clubes': 'club comps'}
 
 
 def mostra(k):
@@ -31,16 +28,16 @@ def relatorio(arquivo, rel, aceito, listas=True):
            '%-24s %7s %11s %13s %6s' % ('table', 'entries', 'translated', 'kept English', 'lost')]
     for nome, r in rel.items():
         out.append('%-24s %7d %11d %13d %6d' % (
-            NOMES_EN[nome], r['banco novo'], r['traduzidas'],
+            conv.NOMES_EN[nome], r['banco novo'], r['traduzidas'],
             r['banco novo'] - r['traduzidas'], r['traduções perdidas']))
     out += ['', '"kept English": new in this database, renamed, or not translated in the original file.',
             '"lost": translations whose entry is not in the new database (or was renamed).']
     for nome, r in rel.items() if listas else []:
         if r['renomeadas']:
-            out += ['', '%s renamed in the new database (now in English; old translation in brackets):' % NOMES_EN[nome]]
+            out += ['', '%s renamed in the new database (now in English; old translation in brackets):' % conv.NOMES_EN[nome]]
             out += ['  %s -> %s   [%s]' % (mostra(a), mostra(b), t.decode('latin-1')) for a, b, t in r['renomeadas']]
         elif nome in conv.DONO and r['perdidas']:
-            out += ['', '%s translations with no match in the new database (renamed or removed):' % NOMES_EN[nome]]
+            out += ['', '%s translations with no match in the new database (renamed or removed):' % conv.NOMES_EN[nome]]
             out += ['  %s   [%s]' % (mostra(a), t.decode('latin-1')) for a, t in r['perdidas']]
     return '\n'.join(out)
 
@@ -51,24 +48,28 @@ def converter(lng, velho, novo, saida, com_eng):
     eng = os.path.join(velho, 'eng.lng')
     if com_eng and os.path.basename(lng).lower() != 'eng.lng':
         if not os.path.exists(eng):
-            raise ValueError('eng.lng not found in %s (uncheck the option to skip it)' % velho)
+            raise conv.Erro('eng.lng not found in %s (uncheck the eng.lng option to skip it)' % velho)
         tarefas.append((eng, True))
-    os.makedirs(saida, exist_ok=True)
+    # converte tudo antes de gravar: um erro no eng.lng não deixa a saída pela metade
+    feitos = [(origem, completar) + conv.converter(origem, velho, novo, completar=completar)
+              for origem, completar in ((o, c or os.path.basename(o).lower() == 'eng.lng') for o, c in tarefas)]
     textos = []
-    for origem, completar in tarefas:
-        completar = completar or os.path.basename(origem).lower() == 'eng.lng'
-        try:
-            dados, rel = conv.converter(origem, velho, novo, completar=completar)
-        except SystemExit as e:  # o lng_converter avisa por sys.exit
-            raise ValueError('%s: %s' % (os.path.basename(origem), e))
-        destino = os.path.join(saida, os.path.basename(origem))
-        if os.path.exists(destino) and not os.path.exists(destino + '.bak'):
-            shutil.copy2(destino, destino + '.bak')  # não perde o arquivo que estava lá
-        open(destino, 'wb').write(dados)
-        aceito = all(x[3] for x in lng_confere.conferir(destino, novo)[0])
-        textos.append(relatorio(destino, rel, aceito, listas=not completar))
-    texto = ('\n\n' + '=' * 70 + '\n\n').join(textos)
-    open(os.path.join(saida, 'lng_converter_report.txt'), 'w', encoding='utf-8').write(texto)
+    try:
+        os.makedirs(saida, exist_ok=True)
+        for origem, completar, dados, rel in feitos:
+            destino = os.path.join(saida, os.path.basename(origem))
+            if os.path.exists(destino) and not os.path.exists(destino + '.bak'):
+                shutil.copy2(destino, destino + '.bak')  # não perde o arquivo que estava lá
+            with open(destino, 'wb') as f:
+                f.write(dados)
+            aceito = all(x[3] for x in lng_confere.conferir(destino, novo)[0])
+            textos.append(relatorio(destino, rel, aceito, listas=not completar))
+        texto = ('\n\n' + '=' * 70 + '\n\n').join(textos)
+        with open(os.path.join(saida, 'lng_converter_report.txt'), 'w', encoding='utf-8') as f:
+            f.write(texto)
+    except OSError as e:  # pasta protegida, arquivo aberto em outro programa, disco cheio...
+        raise conv.Erro('Could not write to %s:\n%s\n(is the file open in the game, or the folder protected? '
+                        'Try another output folder.)' % (saida, e.strerror or e))
     return texto
 
 
@@ -108,7 +109,7 @@ def janela():
     caixa.grid(row=6, column=0, columnspan=3, padx=6, pady=6)
 
     def rodar():
-        v = {k: x.get().strip() for k, x in campos.items()}
+        v = {k: x.get().strip().strip('"') for k, x in campos.items()}  # caminho colado com aspas
         if not all(v.values()):
             messagebox.showwarning('Missing', 'Fill in all four fields.')
             return
@@ -120,8 +121,14 @@ def janela():
         raiz.update()
         try:
             texto = converter(v['lng'], v['velho'], v['novo'], v['saida'], com_eng.get())
-        except (ValueError, OSError) as e:
+        except conv.Erro as e:
             messagebox.showerror('Error', str(e))
+            return
+        except Exception:  # defeito da ferramenta: mostra o rastro para o usuário mandar
+            caixa.insert('1.0', traceback.format_exc())
+            messagebox.showerror('Unexpected error', 'Something went wrong in the converter. The details are in the '
+                                 'window: please copy them and send them to lucastmpacheco (champman0102 forum) or '
+                                 'open an issue on GitHub.')
             return
         finally:
             raiz.config(cursor='')
