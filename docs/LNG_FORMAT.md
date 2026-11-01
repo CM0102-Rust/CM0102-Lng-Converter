@@ -1,0 +1,16 @@
+*[English version](LNG_FORMAT.en.md)*
+
+# Nomes traduzidos (`Data\<idioma>.lng`)
+
+Lidos por `database_load_language_names` (0x5339a0, `Database.cpp`), um arquivo por idioma do jogo: `hol`, `fra`, `ger`, `eng`, `ita`, `por`, `nor`, `esp`, `swe`, `dan`. Ferramentas: `lng_confere.py` (o jogo aceita?) e `lng_converter.py` (leva as traduções de um banco para outro).
+
+- **Cabeçalho:** 8 u32 LE: [0] clubes, [1] continentes, [2] competições de seleções, [3] nações, [4] cidades, [5] competições de clubes, [6] estádios, [7] competições de pessoal. Se o primeiro u32 for 0xf1fffff1, os valores vêm com os bytes trocados (0x90c140).
+- **Conferência (0x533e6a..0x533ec5):** [1], [3], [4], [6], [7] e [5]+[2] contra as quantidades carregadas do banco, que vêm do `index.dat` (campo quantidade, não o tamanho do arquivo; 0x528cd4 no estádio). Os clubes não são conferidos. Se uma não bate: caixa "v3.9.68 Database..cpp 7784" (0x53585d), zera [0xb67a34] e sai sem ler nenhum nome: tudo fica em inglês.
+- **Seções, na ordem do arquivo, sem id (o registro i vale para a entidade i do banco):** clubes [0] × 0x4f (o `club.dat` seguido do `nat_club.dat`, as seleções no fim), continentes [1] × 0xba, competições de seleções [2] × 0x53, nações [3] × 0x6d, estádios [6] × 0x34, cidades [4] × 0x34, competições de pessoal [7] × 0x4f, competições de clubes [5] × 0x53. Cada registro espelha os textos do registro do banco a partir do +4 (nome, gênero, nome curto, gênero, sigla, nacionalidade...); a cidade é a exceção: 51 bytes de nome no `.lng` contra 26 no banco.
+- **Registro vazio = manter o nome do banco:** zeros, com 0xff nos bytes de gênero (+0x33 e +0x4e nos de 0x4f/0x53/0x6d; +0x33 nos de 0x34; +0x1a, +0x9e, +0xb9 no continente). Cada texto vazio mantém o do banco; o gênero é copiado mesmo assim e normalizado (em `por`, 0xff vira 1; nos outros, ≤ 0 vira 0). Nome curto vazio de clube: a seleção ganha o nome cortado em 26; os outros clubes ficam com o curto do banco.
+- **Clubes:** depois que o jogo enxuga o banco (0x5270ed tira os clubes não usados), [0xae23fc][i] guarda o índice original do clube i, e a carga lê o registro [0xae23fc][i] do `.lng`; sem a tabela (0x53436e), lê [0] registros em sequência e os grava na tabela de clubes sem conferir o limite. Por isso um `.lng` com clubes a mais ou a menos desalinha as seleções (ou lê/escreve fora da tabela), mesmo sem a caixa de erro.
+
+- **Segundo leitor, o `eng.lng` (0x544fc0):** com qualquer idioma, o jogo também carrega o `eng.lng` num objeto à parte ([0xae2408]), com a mesma conferência das seis quantidades e a caixa "Database.cpp 19953" (0x5453a4) se uma não bate. Os acessores dele (ex. 0x5457dc) devolvem o texto do registro direto, sem cair no nome do banco; por isso o `eng.lng` vem sem registro vazio (o de 2001 e o da CLZ), e o `lng_converter.py` tem `--completar` para ele.
+- **Exe do NickPatcher (CLZ 25-26):** as duas rotinas e o enxugamento dos clubes estão iguais ao original, menos a caixa do 7784, desligada (5 NOPs no `call` em 0x5358b7): o jogo continua recusando o `.lng` e ficando com o inglês, só que calado. A do 19953 continua.
+
+Medido: o `fra.lng` da 3.9.68 tem 1.993.486 bytes (a soma exata); o `fra.lng` que vem com a CLZ 25-26 é de outra versão do banco (12.008 clubes e 9.128 estádios, contra 12.030 e 9.137 do `index.dat`) e também é recusado.
