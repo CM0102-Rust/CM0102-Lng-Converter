@@ -1,3 +1,5 @@
+![CM .LNG Converter: yeni veritabanı, aynı çeviriler](assets/banner.jpg)
+
 # CM 01/02 .lng dönüştürücü
 
 *[English version](README.md) · [Versão em português](README.pt.md)*

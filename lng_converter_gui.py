@@ -2,10 +2,11 @@
 fórum). Escolhe o .lng traduzido, a pasta Data do banco para o qual ele foi feito, a pasta Data do banco novo e a
 pasta de saída; converte também o eng.lng (o jogo o lê com qualquer idioma) e grava um relatório ao lado.
 
-Uso: python lng_converter_gui.py      (exe: pyinstaller --onefile --windowed lng_converter_gui.py)
+Uso: python lng_converter_gui.py      (exe: build.bat)
 """
 import os
 import shutil
+import sys
 import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext
 
@@ -74,6 +75,10 @@ def converter(lng, velho, novo, saida, com_eng):
 def janela():
     raiz = tk.Tk()
     raiz.title('CM 01/02 .lng converter')
+    # no exe, os assets vêm desempacotados em sys._MEIPASS (build.bat, --add-data)
+    icone = os.path.join(getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))), 'assets', 'icon.ico')
+    if os.path.exists(icone):
+        raiz.iconbitmap(default=icone)
     campos = {}
     linhas = [('lng', 'Translated .lng file', 'file'),
               ('velho', 'Data folder of the database it was made for', 'dir'),

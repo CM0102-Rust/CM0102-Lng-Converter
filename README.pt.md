@@ -1,3 +1,5 @@
+![CM .LNG Converter: banco novo, mesmas traduções](assets/banner.jpg)
+
 # Conversor de .lng do CM 01/02
 
 *[English version](README.md) · [Türkçe](README.tr.md)*
