@@ -34,12 +34,15 @@ Baixe o **`lng_converter.exe`** na página de [Releases](../../releases). É um 
    - **Output folder:** onde gravar. Pode ser a própria pasta `Data` do jogo novo: o arquivo que já estava lá fica guardado como `.bak`.
 3. Deixe marcado **"Also convert eng.lng"**.
 4. Clique em **Convert**. O relatório aparece na janela e fica salvo como `lng_converter_report.txt` na pasta de saída. A primeira linha de cada arquivo diz se o jogo vai aceitá-lo.
+5. Se a pasta de saída não for a pasta `Data` do jogo novo, copie para lá os `.lng` convertidos. Depois abra o jogo e escolha o idioma.
+
+Só isso: não precisa de Python.
 
 Guarde uma cópia da pasta do jogo antes de trocar os arquivos.
 
-### Linha de comando
+### Linha de comando (opcional)
 
-Com o Python 3 instalado, as mesmas ferramentas rodam sem a janela:
+Só para quem prefere à janela; o `lng_converter.exe` faz o mesmo. Com o Python 3 instalado, digite no prompt de comando do Windows (`cmd`), na pasta da ferramenta, e não dentro do Python, trocando o que está entre `< >` pelos caminhos reais:
 
 ```
 python lng_converter.py <entrada.lng> <Data velha> <Data nova> <saída.lng> [--completar] [-v]

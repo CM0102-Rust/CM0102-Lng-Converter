@@ -34,12 +34,15 @@ Her tablo için kaç kaydın çevrildiğini ve kaçının İngilizce kaldığın
    - **Output folder:** dosyaların yazılacağı yer. Yeni oyunun `Data` klasörü de olabilir: orada önceden bulunan dosya `.bak` olarak saklanır.
 3. **"Also convert eng.lng"** kutusunu işaretli bırakın.
 4. **Convert** düğmesine tıklayın. Rapor pencerede görünür ve çıktı klasörüne `lng_converter_report.txt` olarak kaydedilir. Her dosyanın ilk satırı, oyunun o dosyayı kabul edip etmeyeceğini söyler.
+5. Çıktı klasörü yeni oyunun `Data` klasörü değilse, dönüştürülen `.lng` dosyalarını oraya kopyalayın. Sonra oyunu açıp dili seçin.
+
+Bu kadar: Python gerekmez.
 
 Dosyaları değiştirmeden önce oyun klasörünün bir yedeğini alın.
 
-### Komut satırı
+### Komut satırı (isteğe bağlı)
 
-Python 3 kuruluysa aynı araçlar pencere olmadan da çalışır:
+Yalnızca pencere yerine bunu tercih edenler için; `lng_converter.exe` aynı işi yapar. Python 3 kuruluysa bu komutları Python'un içinde değil, aracın klasöründe Windows komut isteminde (`cmd`) yazın ve `< >` içindeki kısımları gerçek yollarla değiştirin:
 
 ```
 python lng_converter.py <girdi.lng> <eski Data> <yeni Data> <çıktı.lng> [--completar] [-v]

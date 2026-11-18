@@ -34,12 +34,15 @@ Get **`lng_converter.exe`** from the [Releases](../../releases) page. It is a si
    - **Output folder:** where to write. It can be the new game's `Data` folder: any file already there is kept as `.bak`.
 3. Leave **"Also convert eng.lng"** checked.
 4. Click **Convert**. The report appears in the window and is saved as `lng_converter_report.txt` in the output folder. The first line of each file says whether the game will accept it.
+5. If the output folder is not the new game's `Data` folder, copy the converted `.lng` files there. Then start the game and pick the language.
+
+That is all: Python is not needed.
 
 Keep a copy of the game folder before replacing files.
 
-### Command line
+### Command line (optional)
 
-With Python 3 installed, the same tools run without the window:
+Only for those who prefer it to the window; `lng_converter.exe` does the same. With Python 3 installed, type these in a Windows command prompt (`cmd`) in the tool's folder, not inside Python, replacing the `< >` parts with real paths:
 
 ```
 python lng_converter.py <input.lng> <old Data> <new Data> <output.lng> [--completar] [-v]
